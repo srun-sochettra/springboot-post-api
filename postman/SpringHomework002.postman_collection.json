@@ -1,0 +1,231 @@
+{
+  "info": {
+    "_postman_id": "8d429795-e853-4acd-8d90-dc4db70059fd",
+    "name": "SpringHomework002 API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for SpringHomework002 in-memory post API."
+  },
+  "item": [
+    {
+      "name": "Create Post",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Spring Boot Basics\",\n  \"content\": \"This post explains the fundamentals of Spring Boot.\",\n  \"author\": \"Alice\",\n  \"tags\": [\"spring\", \"java\", \"backend\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "posts"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Posts",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "posts"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Posts With Pagination",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts?page=1&size=5",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "posts"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "size",
+              "value": "5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Post By ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "posts",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search Post By Title",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts/search/title?title=Spring%20Boot%20Basics",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "posts",
+            "search",
+            "title"
+          ],
+          "query": [
+            {
+              "key": "title",
+              "value": "Spring Boot Basics"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search Posts By Author",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts/search/author?author=Alice",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "posts",
+            "search",
+            "author"
+          ],
+          "query": [
+            {
+              "key": "author",
+              "value": "Alice"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search Posts By Tags",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts/search/tags?tags=java&tags=spring",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "posts",
+            "search",
+            "tags"
+          ],
+          "query": [
+            {
+              "key": "tags",
+              "value": "java"
+            },
+            {
+              "key": "tags",
+              "value": "spring"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Post By ID",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated Spring Boot Basics\",\n  \"content\": \"Updated content.\",\n  \"author\": \"Alice\",\n  \"tags\": [\"spring\", \"java\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "posts",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Post By ID",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "posts",
+            "1"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9090",
+      "type": "string"
+    }
+  ]
+}
