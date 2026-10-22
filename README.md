@@ -1,160 +1,105 @@
-# SpringHomework002
+# Spring Boot Post API
 
-A simple Spring Boot REST API for managing blog posts with in-memory storage.
+**A layered REST coursework project for blog-post CRUD, search and optional pagination.**
 
-![Java](https://img.shields.io/badge/Java-21-blue)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-brightgreen)
-![Build Tool](https://img.shields.io/badge/Build-Maven-C71A36)
-![API Docs](https://img.shields.io/badge/API-Swagger_UI-85EA2D)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+Built with Java 21 and Spring Boot 4.0.6, this application separates HTTP handling, service logic and in-memory data access. Request DTOs apply Jakarta validation, while controller responses use a generic envelope. A Postman collection is included for manual exploration.
 
-## Tech Stack
-
-- Java 21
-- Spring Boot 4.0.6
-- Spring Web MVC
-- Spring Validation (Jakarta Bean Validation)
-- Springdoc OpenAPI + Swagger UI
-- Lombok
-- Maven
+This is a learning API, not a complete publishing platform. Records and ID allocation reset when the process restarts. No database, login, author ownership or publication workflow is implemented.
 
 ## Features
 
-- Create a post
-- Get all posts (with optional pagination)
-- Get a post by ID
-- Search a post by title
-- Search posts by author
-- Search posts by one or more tags
-- Update a post by ID
-- Delete a post by ID
-- Standardized API response envelope (`ApiResponse<T>`)
+- Create, retrieve, replace and delete posts.
+- Find the first case-insensitive full-title match.
+- Find all case-insensitive full-author matches.
+- Search by one or more tags using **any-match**, not all-match, semantics.
+- Optionally paginate the collection using one-based page numbers.
+- Validate create/update requests and expose Swagger UI configuration.
 
-## Base URL
+## Local development
 
-When running locally:
+The POM targets Java 21 and declares Spring Boot 4.0.6, Spring MVC, validation, Lombok and Springdoc 3.0.2. The supplied Maven wrapper selects Maven 3.9.14. These are source declarations, not a freshly tested dependency set.
 
-- `http://localhost:9090`
-- Base endpoint: `http://localhost:9090/api/v1/posts`
+Suggested commands from the original repository root:
 
-## API Documentation
+### Windows PowerShell
 
-- Swagger UI: `http://localhost:9090/swagger-ui.html`
-
-## Project Structure
-
-```text
-src/
-  main/
-    java/com/example/springhomework002/
-      controller/       # REST endpoints
-      model/
-        entity/         # Domain models
-        request/        # Request DTOs
-        response/       # API response wrapper
-      repository/       # In-memory data access implementation
-      service/          # Business logic interfaces + implementations
-    resources/
-      application.properties
+```powershell
+.\mvnw.cmd spring-boot:run
 ```
 
-## Request Validation
+### POSIX shell
 
-`PostRequest` requires:
-
-- `title`: not blank
-- `content`: not blank
-- `author`: not blank
-- `tags`: not empty
-
-## Response Format
-
-Most endpoints return this response shape:
-
-```json
-{
-  "message": "string",
-  "payload": {},
-  "status": "OK",
-  "time": "2026-05-01T20:30:00"
-}
+```sh
+sh mvnw spring-boot:run
 ```
+
+Initial use may download Maven and dependencies. No database or application environment variables are required by the supplied configuration. The server is configured for port 9090, with [local Swagger UI](http://localhost:9090/swagger-ui.html). These commands and the local endpoint were not exercised during this refresh.
 
 ## Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/v1/posts` | Create a new post |
-| `GET` | `/api/v1/posts` | Get all posts |
-| `GET` | `/api/v1/posts?page=1&size=5` | Get posts with pagination (1-based page) |
-| `GET` | `/api/v1/posts/{id}` | Get a post by ID |
-| `GET` | `/api/v1/posts/search/title?title=...` | Search a post by title |
-| `GET` | `/api/v1/posts/search/author?author=...` | Search posts by author |
-| `GET` | `/api/v1/posts/search/tags?tags=java&tags=spring` | Search posts by multiple tags |
-| `PUT` | `/api/v1/posts/{id}` | Update a post by ID |
-| `DELETE` | `/api/v1/posts/{id}` | Delete a post by ID |
+| Method | Path | Behaviour |
+| --- | --- | --- |
+| POST | `/api/v1/posts` | Create; HTTP 201 |
+| GET | `/api/v1/posts` | List all, or paginate when both page and size are supplied; HTTP 200 |
+| GET | `/api/v1/posts/{id}` | Find by ID; HTTP 200 or 404 |
+| GET | `/api/v1/posts/search/title?title=Example` | First full-title match; HTTP 200 or 404 |
+| GET | `/api/v1/posts/search/author?author=Alex` | Full-author matches; HTTP 200 or 404 |
+| GET | `/api/v1/posts/search/tags?tags=java&tags=spring` | Posts matching either requested tag; HTTP 200 or 404 |
+| PUT | `/api/v1/posts/{id}` | Replace editable fields; HTTP 200 or 404 |
+| DELETE | `/api/v1/posts/{id}` | Remove; HTTP 200 or 404, with null payload |
 
-## Sample Request Body
+Title/author matching ignores case but does not trim or perform substring matching. Duplicate titles are permitted. Search endpoints return 404 with a null payload when nothing matches, unlike an empty collection response.
 
-Use this JSON for `POST /api/v1/posts` and `PUT /api/v1/posts/{id}`:
+### Pagination
+
+Use `page=1&size=5` for the first five records in insertion order. Pagination applies only when **both** parameters are present; providing just one returns the full list. The controller clamps values below 1 to 1. A page beyond the end returns an empty list. Responses contain no total-count or page metadata.
+
+There is no maximum size or overflow protection around integer index arithmetic. Extreme values require a separate correctness fix and regression check.
+
+### Request body
+
+Illustrative synthetic input for POST and PUT, not a captured execution:
 
 ```json
 {
-  "title": "Spring Boot Basics",
-  "content": "This post explains the fundamentals of Spring Boot.",
-  "author": "Alice",
-  "tags": ["spring", "java", "backend"]
+  "title": "Learning Spring",
+  "content": "A sample post for local API practice.",
+  "author": "Alex",
+  "tags": ["java", "spring"]
 }
 ```
 
-## Getting Started
+Title, content and author must be non-blank. Tags must be a non-empty list, but individual tag elements have no non-blank/null constraint. No maximum text/list lengths are supplied. PUT requires the complete validated request, preserves the existing ID and creationDate, and replaces title/content/author/tags. It is not a partial update.
 
-### Prerequisites
+## Architecture
 
-- Java 21
-- Maven 3.9+
-
-### Run Locally
-
-1. Clone the repository.
-2. Navigate to the project directory.
-3. Run the application:
-
-```bash
-mvn spring-boot:run
+```text
+PostController -> PostService -> PostServiceImpl -> PostRepository
+                                                   |
+                                          InMemoryPostRepository
 ```
 
-The application starts on port `9090`.
+The in-memory implementation is a package-private class inside [PostRepository.java](src/main/java/com/example/springhomework002/repository/PostRepository.java), not a separate file or JPA repository. It uses an ArrayList and an ordinary incrementing Integer counter without synchronisation. Copies of lists do not make the mutable post objects thread-safe.
 
-### Build
+[PostRequest.java](src/main/java/com/example/springhomework002/model/request/PostRequest.java) separates input from the stored model. The service assigns creationDate on insertion. Controller envelopes contain message, payload, HttpStatus status and a LocalDateTime response timestamp. These times have no explicit timezone and are not execution durations.
 
-```bash
-mvn clean package
+No global exception handler is supplied. Framework-level validation, parsing and parameter-binding errors are not explicitly converted into this envelope.
+
+## Manual requests and checks
+
+Import [the existing Postman collection](postman/SpringHomework002.postman_collection.json) and review its baseUrl variable, configured for the local port-9090 server. It contains example requests, not automated assertions or verified results. Update/delete examples assume ID 1 exists.
+
+Suggested Windows checks:
+
+```powershell
+.\mvnw.cmd test
+.\mvnw.cmd package
 ```
 
-### Run Tests
+POSIX equivalents use `sh mvnw test` and `sh mvnw package`. The supplied Java test is a contextLoads smoke test without endpoint assertions. No Maven download, compilation, test, server startup or HTTP request was performed during this documentation refresh.
 
-```bash
-mvn test
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) and [refresh notes](docs/repository-refresh.md). This overlay changes documentation only.
 
-## Postman Collection
+## Licence
 
-- Collection file: `postman/SpringHomework002.postman_collection.json`
-- Import this file into Postman, then use the `baseUrl` variable (`http://localhost:9090`) to run requests.
-
-Quick example with `curl`:
-
-```bash
-curl --request GET "http://localhost:9090/api/v1/posts"
-```
-
-## Notes
-
-- Data is stored in memory (`InMemoryPostRepository`), so it resets when the application restarts.
-- Pagination in `GET /api/v1/posts` is applied only when both `page` and `size` are provided.
-
-## License
-
-This project is licensed under the MIT License. See `LICENSE` for details.
-
+The existing [MIT License](LICENSE) is retained unchanged. Its copyright line states 2026 without naming a holder; this refresh does not fill in legal attribution.
